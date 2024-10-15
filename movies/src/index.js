@@ -1,7 +1,13 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
 import HomePage from "./pages/homePage";
-
+import MovieDetailsPage from './pages/movieDetailsPage'
+const images = [
+  "/kOVEVeg59E0wsnXmF9nrh6OmWII.jpg",
+  "/v1QQKq8M0fWxMgSdGOX1aCv8qMB.jpg",
+  "/2iGN0aKHJYD0xQydlfuCUAcgNbO.jpg",
+  "/rjBwhsOzHKUw2NIOrE7aMqjfe6s.jpg",
+]  
 const sample = {
   adult: false,
   backdrop_path: "/5Iw7zQTHVRBOYpA0V6z0yypOPZh.jpg",
@@ -83,11 +89,12 @@ const sample = {
   vote_count: 9692,
 };
 
+
 const movies = [sample, sample, sample, sample, sample, sample, sample];
 
 const App = () => {
   return (
-      <HomePage movies={movies} />
+      <MovieDetailsPage movie={sample} images={images} />
   );
 };
 

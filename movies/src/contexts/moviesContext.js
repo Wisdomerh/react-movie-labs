@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 
 export const MoviesContext = React.createContext(null);
-
 const MoviesContextProvider = (props) => {
   const [favorites, setFavorites] = useState( [] )
+  
+  const [myReviews, setMyReviews] = useState( {} ) 
 
   const addToFavorites = (movie) => {
     let newFavorites = [];
@@ -16,6 +17,11 @@ const MoviesContextProvider = (props) => {
     setFavorites(newFavorites)
   };
   
+  const addReview = (movie, review) => {
+    setMyReviews( {...myReviews, [movie.id]: review } )
+  };
+  //console.log(myReviews);
+
   // We will use this function in the next step
   const removeFromFavorites = (movie) => {
     setFavorites( favorites.filter(
@@ -28,7 +34,8 @@ const MoviesContextProvider = (props) => {
       value={{
         favorites,
         addToFavorites,
-        removeFromFavorites
+        removeFromFavorites,
+        addReview,
       }}
     >
       {props.children}

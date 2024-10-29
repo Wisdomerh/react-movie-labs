@@ -22,7 +22,7 @@ const UpcomingMoviesPage = () => {
     <PageTemplate
       title="Upcoming Movies"
       movies={movies}
-      action={(movie) => <AddToPlaylistIcon />}
+      action={(movie) => <AddToPlaylistIcon movie={movie} />}
     />
   );
 };

@@ -1,4 +1,11 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { 
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged
+} from 'firebase/auth';
+import { auth } from '../firebase-config';
 
 const AuthContext = createContext();
 
@@ -8,24 +15,55 @@ export function useAuth() {
 
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user);
+      setLoading(false);
+    });
+
+    return unsubscribe;
+  }, []);
 
   const value = {
     currentUser,
-    login: (email, password) => {
-      console.log('Login attempt:', email);
-      // Mock successful login for now
-      setCurrentUser({ email });
-      return Promise.resolve();
+    signup: async (email, password) => {
+      try {
+        const result = await createUserWithEmailAndPassword(auth, email, password);
+        setCurrentUser(result.user);
+        return result;
+      } catch (error) {
+        console.error("Signup error:", error);
+        throw error;
+      }
     },
-    logout: () => {
-      setCurrentUser(null);
-      return Promise.resolve();
+    login: async (email, password) => {
+      try {
+        const result = await signInWithEmailAndPassword(auth, email, password);
+        setCurrentUser(result.user);
+        return result;
+      } catch (error) {
+        console.error("Login error:", error);
+        throw error;
+      }
+    },
+    logout: async () => {
+      try {
+        await signOut(auth);
+        setCurrentUser(null);
+      } catch (error) {
+        console.error("Logout error:", error);
+        throw error;
+      }
     }
   };
 
   return (
     <AuthContext.Provider value={value}>
-      {children}
+      {!loading ? children : <div>Loading...</div>}
     </AuthContext.Provider>
   );
 }
+
+export default AuthProvider;

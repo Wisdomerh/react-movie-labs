@@ -18,6 +18,7 @@ import TrendingMoviesPage from "./pages/trendingMoviesPage";
 import ActorDetailsPage from './pages/actorDetailsPage';
 import { AuthProvider } from './contexts/authContext';
 import LoginForm from './components/loginForm';
+import SignupForm from './components/signupForm';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -49,6 +50,7 @@ const App = () => {
               <Route path="/movies/trending" element={<TrendingMoviesPage />} />
               <Route path="/person/:id" element={<ActorDetailsPage />} />
               <Route path="/login" element={<LoginForm />} />
+              <Route path="/signup" element={<SignupForm />} />
             </Routes>
           </MoviesContextProvider>
         </BrowserRouter>

@@ -23,7 +23,6 @@ const SiteHeader = ({ history }) => {
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const navigate = useNavigate();
   
-  // Get auth context safely
   const auth = useAuth();
   const isAuthenticated = auth?.currentUser != null;
 
@@ -94,7 +93,10 @@ const SiteHeader = ({ history }) => {
                 {isAuthenticated ? (
                   <MenuItem onClick={() => auth.logout()}>Logout</MenuItem>
                 ) : (
-                  <MenuItem onClick={() => navigate('/login')}>Login</MenuItem>
+                  <>
+                    <MenuItem onClick={() => navigate('/login')}>Login</MenuItem>
+                    <MenuItem onClick={() => navigate('/signup')}>Sign Up</MenuItem>
+                  </>
                 )}
               </Menu>
             </>
@@ -114,9 +116,14 @@ const SiteHeader = ({ history }) => {
                   Logout
                 </Button>
               ) : (
-                <Button color="inherit" onClick={() => navigate('/login')}>
-                  Login
-                </Button>
+                <>
+                  <Button color="inherit" onClick={() => navigate('/login')}>
+                    Login
+                  </Button>
+                  <Button color="inherit" onClick={() => navigate('/signup')}>
+                    Sign Up
+                  </Button>
+                </>
               )}
             </>
           )}

@@ -2,12 +2,13 @@ import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 
 const firebaseConfig = {
-  apiKey: "your-api-key",
-  authDomain: "your-auth-domain",
-  projectId: "your-project-id",
-  storageBucket: "your-storage-bucket",
-  messagingSenderId: "your-messaging-sender-id",
-  appId: "your-app-id"
+  apiKey: "AIzaSyDknZL9YXFW46LQMzHtv5jjgN2Yar6kalU",
+  authDomain: "movie-app-453f6.firebaseapp.com",
+  projectId: "movie-app-453f6",
+  storageBucket: "movie-app-453f6.firebasestorage.app",
+  messagingSenderId: "844358097956",
+  appId: "1:844358097956:web:a002ab8de6e0c2525fccb1",
+  measurementId: "G-S9946B5GCM"
 };
 
 const app = initializeApp(firebaseConfig);

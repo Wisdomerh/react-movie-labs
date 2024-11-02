@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
@@ -15,16 +15,18 @@ import { useAuth } from '../../contexts/authContext';
 
 const Offset = styled('div')(({ theme }) => theme.mixins.toolbar);
 
-const SiteHeader = ({ history }) => {
+const SiteHeader = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
-
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const navigate = useNavigate();
-  
-  const auth = useAuth();
-  const isAuthenticated = auth?.currentUser != null;
+  const { currentUser, logout } = useAuth();
+
+  // Debug log to check auth state
+  useEffect(() => {
+    console.log("Auth state in header:", currentUser ? "Logged in" : "Not logged in");
+  }, [currentUser]);
 
   const menuOptions = [
     { label: "Home", path: "/" },
@@ -44,6 +46,35 @@ const SiteHeader = ({ history }) => {
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
   };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/');
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
+
+  const authButtons = currentUser ? (
+    <>
+      <Typography variant="body1" sx={{ mr: 2 }}>
+        {currentUser.email}
+      </Typography>
+      <Button color="inherit" onClick={handleLogout}>
+        Logout
+      </Button>
+    </>
+  ) : (
+    <>
+      <Button color="inherit" onClick={() => navigate('/login')}>
+        Login
+      </Button>
+      <Button color="inherit" onClick={() => navigate('/signup')}>
+        Sign Up
+      </Button>
+    </>
+  );
 
   return (
     <>
@@ -90,8 +121,8 @@ const SiteHeader = ({ history }) => {
                   </MenuItem>
                 ))}
                 <MenuItem divider />
-                {isAuthenticated ? (
-                  <MenuItem onClick={() => auth.logout()}>Logout</MenuItem>
+                {currentUser ? (
+                  <MenuItem onClick={handleLogout}>Logout</MenuItem>
                 ) : (
                   <>
                     <MenuItem onClick={() => navigate('/login')}>Login</MenuItem>
@@ -111,20 +142,7 @@ const SiteHeader = ({ history }) => {
                   {opt.label}
                 </Button>
               ))}
-              {isAuthenticated ? (
-                <Button color="inherit" onClick={() => auth.logout()}>
-                  Logout
-                </Button>
-              ) : (
-                <>
-                  <Button color="inherit" onClick={() => navigate('/login')}>
-                    Login
-                  </Button>
-                  <Button color="inherit" onClick={() => navigate('/signup')}>
-                    Sign Up
-                  </Button>
-                </>
-              )}
+              {authButtons}
             </>
           )}
         </Toolbar>

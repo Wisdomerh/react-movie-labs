@@ -1,30 +1,54 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useAuth } from "./authContext";
+import { getDatabase, ref, set, get } from "firebase/database";
 
 export const MoviesContext = React.createContext(null);
+
 const MoviesContextProvider = (props) => {
-  const [favorites, setFavorites] = useState( [] )
-  
-  const [myReviews, setMyReviews] = useState( {} ) 
+  const [favorites, setFavorites] = useState([]);
+  const [myReviews, setMyReviews] = useState({});
   const [mustWatch, setMustWatch] = useState([]);
+  const { currentUser } = useAuth();
+  const db = getDatabase();
+
+  useEffect(() => {
+    if (currentUser) {
+      const userFavoritesRef = ref(db, `users/${currentUser.uid}/favorites`);
+      const userMustWatchRef = ref(db, `users/${currentUser.uid}/mustWatch`);
+
+      get(userFavoritesRef).then((snapshot) => {
+        if (snapshot.exists()) {
+          setFavorites(snapshot.val());
+        }
+      });
+
+      get(userMustWatchRef).then((snapshot) => {
+        if (snapshot.exists()) {
+          setMustWatch(snapshot.val());
+        }
+      });
+    }
+  }, [currentUser, db]);
+
   const addToFavorites = (movie) => {
     let newFavorites = [];
-    if (!favorites.includes(movie.id)){
+    if (!favorites.includes(movie.id)) {
       newFavorites = [...favorites, movie.id];
-    }
-    else{
+    } else {
       newFavorites = [...favorites];
     }
-    setFavorites(newFavorites)
-  };
-  
-  const addReview = (movie, review) => {
-    setMyReviews( {...myReviews, [movie.id]: review } )
+    setFavorites(newFavorites);
+    if (currentUser) {
+      set(ref(db, `users/${currentUser.uid}/favorites`), newFavorites);
+    }
   };
 
   const removeFromFavorites = (movie) => {
-    setFavorites( favorites.filter(
-      (mId) => mId !== movie.id
-    ) )
+    const newFavorites = favorites.filter((mId) => mId !== movie.id);
+    setFavorites(newFavorites);
+    if (currentUser) {
+      set(ref(db, `users/${currentUser.uid}/favorites`), newFavorites);
+    }
   };
 
   const addToMustWatch = (movie) => {
@@ -33,7 +57,16 @@ const MoviesContextProvider = (props) => {
       newMustWatch.push(movie.id);
     }
     setMustWatch(newMustWatch);
-    console.log("Must Watch List:", newMustWatch);
+    if (currentUser) {
+      set(ref(db, `users/${currentUser.uid}/mustWatch`), newMustWatch);
+    }
+  };
+
+  const addReview = (movie, review) => {
+    setMyReviews({ ...myReviews, [movie.id]: review });
+    if (currentUser) {
+      set(ref(db, `users/${currentUser.uid}/reviews/${movie.id}`), review);
+    }
   };
 
   return (

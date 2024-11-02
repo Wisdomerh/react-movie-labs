@@ -1,26 +1,34 @@
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/authContext';
 import { 
   Card, 
   CardContent, 
-  Typography, 
   TextField, 
   Button, 
-  Box 
+  Typography, 
+  Box, 
+  Alert 
 } from '@mui/material';
 
 const LoginForm = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const navigate = useNavigate();
-  const auth = useAuth();
+  const { login } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // For now, just console log and navigate
-    console.log('Login attempt with:', email);
-    navigate('/');
+    try {
+      setError('');
+      await login(email, password);
+      console.log("Login successful");
+      navigate('/');
+    } catch (err) {
+      setError('Failed to sign in: ' + err.message);
+      console.error("Login error:", err);
+    }
   };
 
   return (
@@ -30,15 +38,14 @@ const LoginForm = () => {
       alignItems: 'center',
       minHeight: 'calc(100vh - 64px)'
     }}>
-      <Card sx={{ 
-        maxWidth: 400,
-        width: '100%',
-        m: 2
-      }}>
+      <Card sx={{ maxWidth: 400, width: '100%', m: 2 }}>
         <CardContent>
           <Typography variant="h5" component="h1" gutterBottom>
             Login
           </Typography>
+
+          {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+
           <form onSubmit={handleSubmit}>
             <TextField
               label="Email"
@@ -61,7 +68,6 @@ const LoginForm = () => {
             <Button
               type="submit"
               variant="contained"
-              color="primary"
               fullWidth
               sx={{ mt: 2 }}
             >

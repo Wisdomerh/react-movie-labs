@@ -12,60 +12,119 @@ const MoviesContextProvider = (props) => {
   const db = getDatabase();
 
   useEffect(() => {
-    if (currentUser) {
-      const userFavoritesRef = ref(db, `users/${currentUser.uid}/favorites`);
-      const userMustWatchRef = ref(db, `users/${currentUser.uid}/mustWatch`);
+    const loadUserData = async () => {
+      if (currentUser) {
+        console.log("Loading data for user:", currentUser.uid);
+        
+        try {
+          const favRef = ref(db, `users/${currentUser.uid}/favorites`);
+          const favSnapshot = await get(favRef);
+          
+          if (favSnapshot.exists()) {
+            setFavorites(favSnapshot.val());
+            console.log("Loaded favorites:", favSnapshot.val());
+          }
 
-      get(userFavoritesRef).then((snapshot) => {
-        if (snapshot.exists()) {
-          setFavorites(snapshot.val());
-        }
-      });
+          const watchRef = ref(db, `users/${currentUser.uid}/mustWatch`);
+          const watchSnapshot = await get(watchRef);
+          
+          if (watchSnapshot.exists()) {
+            setMustWatch(watchSnapshot.val());
+            console.log("Loaded must-watch:", watchSnapshot.val());
+          }
 
-      get(userMustWatchRef).then((snapshot) => {
-        if (snapshot.exists()) {
-          setMustWatch(snapshot.val());
+          const reviewsRef = ref(db, `users/${currentUser.uid}/reviews`);
+          const reviewsSnapshot = await get(reviewsRef);
+          
+          if (reviewsSnapshot.exists()) {
+            setMyReviews(reviewsSnapshot.val());
+            console.log("Loaded reviews:", reviewsSnapshot.val());
+          }
+        } catch (error) {
+          console.error("Error loading user data:", error);
         }
-      });
-    }
+      } else {
+        setFavorites([]);
+        setMustWatch([]);
+        setMyReviews({});
+      }
+    };
+
+    loadUserData();
   }, [currentUser, db]);
 
-  const addToFavorites = (movie) => {
-    let newFavorites = [];
-    if (!favorites.includes(movie.id)) {
-      newFavorites = [...favorites, movie.id];
-    } else {
-      newFavorites = [...favorites];
-    }
-    setFavorites(newFavorites);
-    if (currentUser) {
-      set(ref(db, `users/${currentUser.uid}/favorites`), newFavorites);
+  const addToFavorites = async (movie) => {
+    if (!currentUser) return;
+
+    try {
+      let newFavorites = [...favorites];
+      if (!favorites.includes(movie.id)) {
+        newFavorites.push(movie.id);
+        
+        const favRef = ref(db, `users/${currentUser.uid}/favorites`);
+        await set(favRef, newFavorites);
+        
+        setFavorites(newFavorites);
+        console.log("Movie added to favorites");
+      }
+    } catch (error) {
+      console.error("Error adding favorite:", error);
     }
   };
 
-  const removeFromFavorites = (movie) => {
-    const newFavorites = favorites.filter((mId) => mId !== movie.id);
-    setFavorites(newFavorites);
-    if (currentUser) {
-      set(ref(db, `users/${currentUser.uid}/favorites`), newFavorites);
+  const removeFromFavorites = async (movie) => {
+    if (!currentUser) return;
+
+    try {
+      const newFavorites = favorites.filter(
+        (mId) => mId !== movie.id
+      );
+      
+      const favRef = ref(db, `users/${currentUser.uid}/favorites`);
+      await set(favRef, newFavorites);
+      
+      setFavorites(newFavorites);
+      console.log("Movie removed from favorites");
+    } catch (error) {
+      console.error("Error removing favorite:", error);
     }
   };
 
-  const addToMustWatch = (movie) => {
-    let newMustWatch = [...mustWatch];
-    if (!mustWatch.includes(movie.id)) {
-      newMustWatch.push(movie.id);
-    }
-    setMustWatch(newMustWatch);
-    if (currentUser) {
-      set(ref(db, `users/${currentUser.uid}/mustWatch`), newMustWatch);
+  const addToMustWatch = async (movie) => {
+    if (!currentUser) return;
+
+    try {
+      let newMustWatch = [...mustWatch];
+      if (!mustWatch.includes(movie.id)) {
+        newMustWatch.push(movie.id);
+        
+        const watchRef = ref(db, `users/${currentUser.uid}/mustWatch`);
+        await set(watchRef, newMustWatch);
+        
+        setMustWatch(newMustWatch);
+        console.log("Movie added to must-watch");
+      }
+    } catch (error) {
+      console.error("Error adding to must-watch:", error);
     }
   };
 
-  const addReview = (movie, review) => {
-    setMyReviews({ ...myReviews, [movie.id]: review });
-    if (currentUser) {
-      set(ref(db, `users/${currentUser.uid}/reviews/${movie.id}`), review);
+  const addReview = async (movie, review) => {
+    if (!currentUser) return;
+
+    try {
+      const updatedReviews = {
+        ...myReviews,
+        [movie.id]: review
+      };
+      
+      const reviewRef = ref(db, `users/${currentUser.uid}/reviews/${movie.id}`);
+      await set(reviewRef, review);
+       
+      setMyReviews(updatedReviews);
+      console.log("Review added");
+    } catch (error) {
+      console.error("Error adding review:", error);
     }
   };
 
@@ -77,6 +136,8 @@ const MoviesContextProvider = (props) => {
         removeFromFavorites,
         mustWatch,
         addToMustWatch,
+        addReview,
+        myReviews,
       }}
     >
       {props.children}

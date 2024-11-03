@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { 
+  createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged 
@@ -18,7 +19,6 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      console.log("Auth state changed:", user ? "User logged in" : "No user");
       setCurrentUser(user);
       setLoading(false);
     });
@@ -26,10 +26,20 @@ export function AuthProvider({ children }) {
     return unsubscribe;
   }, []);
 
+  const signup = async (email, password) => {
+    try {
+      const result = await createUserWithEmailAndPassword(auth, email, password);
+      setCurrentUser(result.user);
+      return result;
+    } catch (error) {
+      console.error("Signup error:", error);
+      throw error;
+    }
+  };
+
   const login = async (email, password) => {
     try {
       const result = await signInWithEmailAndPassword(auth, email, password);
-      console.log("Login successful:", result.user.email);
       setCurrentUser(result.user);
       return result;
     } catch (error) {
@@ -42,7 +52,6 @@ export function AuthProvider({ children }) {
     try {
       await signOut(auth);
       setCurrentUser(null);
-      console.log("Logout successful");
     } catch (error) {
       console.error("Logout error:", error);
       throw error;
@@ -51,6 +60,7 @@ export function AuthProvider({ children }) {
 
   const value = {
     currentUser,
+    signup,
     login,
     logout
   };

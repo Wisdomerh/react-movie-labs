@@ -111,6 +111,15 @@ const MoviesContextProvider = (props) => {
     }
   };
 
+  const removeFromMustWatch = async (movieId) => {
+    if (currentUser) {
+      const updatedList = mustWatch.filter((id) => id !== movieId);
+      const mustWatchRef = ref(db, `users/${currentUser.uid}/mustWatch`);
+      await set(mustWatchRef, updatedList);
+      setMustWatch(updatedList);
+    }
+  };
+  
   const addReview = async (movie, review) => {
     if (!currentUser) return;
 

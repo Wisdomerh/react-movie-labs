@@ -119,7 +119,7 @@ const MoviesContextProvider = (props) => {
       setMustWatch(updatedList);
     }
   };
-  
+
   const addReview = async (movie, review) => {
     if (!currentUser) return;
 
@@ -148,6 +148,7 @@ const MoviesContextProvider = (props) => {
         removeFromFavorites,
         mustWatch,
         addToMustWatch,
+        removeFromMustWatch,
         addReview,
         myReviews,
       }}

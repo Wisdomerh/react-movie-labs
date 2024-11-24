@@ -12,23 +12,45 @@ import CalendarIcon from "@mui/icons-material/CalendarTodayTwoTone";
 import StarRateIcon from "@mui/icons-material/StarRate";
 import IconButton from "@mui/material/IconButton";
 import Grid from "@mui/material/Grid2";
-import img from '../../images/film-poster-placeholder.png'
+import img from '../../images/film-poster-placeholder.png';
 import { Link } from "react-router-dom";
 import Avatar from '@mui/material/Avatar';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 
 export default function MovieCard({ movie, action }) {
-  const { favorites, addToFavorites } = useContext(MoviesContext);
+  const { favorites, addToFavorites, mustWatch, addToMustWatch, removeFromMustWatch } = useContext(MoviesContext);
 
+  // Check if movie is in favorites
   if (favorites.find((id) => id === movie.id)) {
     movie.favorite = true;
   } else {
-    movie.favorite = false
+    movie.favorite = false;
   }
 
+  // Check if movie is in Must Watch list
+  if (mustWatch.find((id) => id === movie.id)) {
+    movie.mustWatch = true;
+  } else {
+    movie.mustWatch = false;
+  }
+
+  // Handle adding to favorites
   const handleAddToFavorite = (e) => {
     e.preventDefault();
     addToFavorites(movie);
   };
+
+  // Handle adding/removing from Must Watch list
+  const handleAddToMustWatch = (e) => {
+    e.preventDefault();
+    addToMustWatch(movie);
+  };
+
+  const handleRemoveFromMustWatch = (e) => {
+    e.preventDefault();
+    removeFromMustWatch(movie);
+  };
+
   return (
     <Card>
       <CardHeader
@@ -70,8 +92,21 @@ export default function MovieCard({ movie, action }) {
         </Grid>
       </CardContent>
       <CardActions disableSpacing>
-      
-      {action(movie)}
+        {}
+        <IconButton
+          onClick={movie.mustWatch ? handleRemoveFromMustWatch : handleAddToMustWatch}
+          sx={{
+            color: movie.mustWatch ? 'primary.main' : 'text.secondary',
+            '&:hover': {
+              color: movie.mustWatch ? 'primary.dark' : 'text.primary',
+            },
+          }}
+        >
+          <VisibilityIcon fontSize="large" />
+        </IconButton>
+
+        {/* Action button passed from parent */}
+        {action(movie)}
     
       <Link to={`/movies/${movie.id}`}>
         <Button variant="outlined" size="medium" color="primary">
